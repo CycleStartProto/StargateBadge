@@ -1,0 +1,143 @@
+--------------------------------------------------------------
+	WS2812 multi-channel Driver Frimware command structure
+--------------------------------------------------------------
+
+plain text file, can be interpretted as CSV, but uses different file extension (.anim) to help differentiate. (no, I didnt check to see if that was used elsewhere)
+no distinction is made between an animation and a single frame.
+ideally the display should only be cleared if absolutely necessary to keep animations fluid and minimize data rates
+!!ALL COMMANDS ARE CASE SENSITIVE!! (Sorry, I need this to go FAST, which means minimizing parsing)
+
+this command structure is designed to be auto-generated, yet still somewhat human readable
+pixels are NOT cleared between files.
+
+--------------------------------------------------------------
+	Text File Command structure
+--------------------------------------------------------------
+
+XXX YYY ZZZ<new-line>
+
+XXX = Command (3-6 characters)
+YYY = Index, slice, or sub command (if applicable), single number for a single index or slice format, ie "[0:5]" or "2" or "[2]" would be valid (no quotes)
+ZZZ = Setting (typically color, interpreted as a 32 bit int)
+new line terminated.
+
+-------------------------------------------------------------
+	Serial command structure
+-------------------------------------------------------------
+
+XXX YYY ZZZ<new-line>
+
+XXX = Command (3-6 characters)
+YYY = Index, slice, or sub command (if applicable), single number for a single index or slice format, ie "[0:5]" or "2" or "[2]" would be valid (no quotes)
+ZZZ = Setting (typically color, interpreted as a 32 bit int)
+new line (\n) terminated.
+
+(identical to text file structure)
+
+system will execute serial commands as they come in, in parallel with the loaded animation file if possible. terminate an already-running animation by sending the HALT command.
+
+system will reply with ACK once the command is done executing
+
+
+-------------------------------------------------------------
+	Color representation
+-------------------------------------------------------------
+
+any time a color paramter is used, it is the first 24 bits of a 32 bit int, 8 bits per sub pixel.
+represented in hex: 00RRGGBB (no 16# precursor, leading zeros not required, but recommend showing all 6 bytes for clarity.) 
+Examples:
+white: ffffff 
+red: ff0000 
+green: 00ff00 
+blue: 0000ff
+
+
+-------------------------------------------------------------
+	Time and Delays
+-------------------------------------------------------------
+all time parameters are in milliseconds, ie "10" (no quotes) for 10 milliseconds (parsed as base 10 int).
+
+
+-------------------------------------------------------------
+	Command List (XXX)
+-------------------------------------------------------------
+
+#			= single line comment (ignore everything until the next newline character)
+
+CLR 			= Clear All Pixels (set to black/off)
+
+CLR I[index or slice] 			= Clear specific pixels
+
+SET I[index or slice] C<color>			 = set an index or slice to a specific color (see above for color information)
+
+SHOW			= force a pixel update
+
+DLY			 = delay for whatever the default frame delay is set to. delay time is defined system-wide in BoardSettings.txt, but can be set on a per animation file basis (see next command)
+
+DEFDLY T<time in ms>			 = set the default frame delay for all subsequent commands this file. will reset to default on file exit or restart.
+
+DLY T<time in ms>			= Delay for a certain amount of time.
+
+RANDLY L<min time (ms)> H<max time (ms)>			= delay for a random amount of time between min and max
+
+BRT B<0.0-1.0 value>			= set global brightness for all subsequent commands in this file, overrides default global brightness. parsed as floating point with a valid range of 0.0 to 1.0, ie "0.5" (not quotes) would be 50%
+
+DEFBRT			= set global brightness back to default assigned by BoardSettings.txt
+
+LOD <filename.anim>			= load and display an animation file, must be present on local storage, !!! WILL NOT JUMP BACK TO THIS FILE WHEN FINISHED !!! used as last command in a file to chain animations across seperate files
+
+HALT			= Stop the exectution of the animation, not super useful inside an animation file, but useful for interupting a running animation from serial
+
+-----------------------------------------------------------
+	Examples:
+-----------------------------------------------------------
+
+CLR #Clear all pixels
+SET I3 C0000FF #Set 3rd picel to blue
+SET I5:10 CFFFFFF #set pixel 5 thorugh 10 to white
+DLY #delay for 1 frame
+CLR I3 #turn off the 3rd pixel
+BRT B0.5 #set brightness to 50%
+
+-------------------------------------------------------------
+	Shorthand conventions
+-------------------------------------------------------------
+the system will store both the last command and parameters while executing and use them for future steps when possible.
+There is also a shortcut built in for setting multiple consecutive LED's to different colors,
+if the SET command is active, and it recieves a second C<color> call without a coresponding I[Index or slice], it will assume it applies to the next index in the chain and incriment accordingly.
+This ONLY WORKS WITH "SET" AND "CLR" COMMANDS!!
+this allows for "shorthand" code to be written, for example:
+
+SET I2 C00FF00
+SET I5 C00FF00
+SET I9 C00FF00
+SET I25 C00FF00
+SET I8 CFF0000
+SET I6 CFF0000
+DLY
+CLR I2
+CLR I5
+CLR I9
+SET I1 C0000FF
+SET I2 C00FF00
+SET I3 CFF0000
+SET I4 CFFFFFF
+
+can be shortened to:
+
+SET I2 C00FF00
+I5
+I9
+I25
+I8 CFF0000
+I6
+DLY
+CLR I2
+I5
+I9
+SET I1 C0000FF
+C00FF00
+CFF0000
+CFFFFFF
+
+This allows for smaller file sizes and quicker code execution in most cases

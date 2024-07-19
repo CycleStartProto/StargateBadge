@@ -1,0 +1,26 @@
+0=current cal mode, 1=current disp mode, 2=Normal Mode
+Mode: 2;
+
+serial channel ID
+Serial ID: 0;
+
+name of animation to load on startup
+Startup File: "idle.anim";
+
+Current Limit Settings
+Board Current: 2000; (mA)
+
+number of pixel in each strand
+Strand Length: 36;
+
+Default Animation Frame Delay:
+Default Frame Delay: 15; (ms)
+
+set default brightness (can be overridden by external commands)
+Default Brightness: 0.3; (floating Point, 0.0-1.0)
+
+ADC current measurement cal values
+
+Shunt Scale: 0.07784;
+Shunt Offset: 272.4;
+
