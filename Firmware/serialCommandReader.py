@@ -69,9 +69,6 @@ class serialCommandReader():
     def cyclicCall(self):
         isready = self.CP.isReady()
         if self.oldReady != isready:
-                print("changed")
-                print(self.oldReady)
-                print(isready)
                 self.oldReady = isready
                 if isready:
                     self.ser.write("ACK\n\r".encode())
