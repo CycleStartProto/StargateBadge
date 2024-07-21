@@ -1,4 +1,9 @@
 class BoardSettings:
+    
+    #Global interface variables
+    loadRequested = False
+    loadReqFile = ""
+    haltRequested = False
 
     #settings Managed By this class:
     Mode = 2

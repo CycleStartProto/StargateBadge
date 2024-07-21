@@ -30,7 +30,7 @@ XXX YYY ZZZ<new-line>
 XXX = Command (3-6 characters)
 YYY = Index, slice, or sub command (if applicable), single number for a single index or slice format, ie "[0:5]" or "2" or "[2]" would be valid (no quotes)
 ZZZ = Setting (typically color, interpreted as a 32 bit int)
-new line (\n) terminated.
+new line (\n) or cariage return (\r) terminated.
 
 (identical to text file structure)
 

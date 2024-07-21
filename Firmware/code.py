@@ -6,7 +6,6 @@ import adafruit_ticks
 import gc
 import os
 import supervisor
-import asyncio
 import rp2pio
 
 import random
@@ -17,6 +16,8 @@ from LedString import LedString
 from CommandParser import CommandParser
 from serialCommandReader import serialCommandReader
 from animReader import animReader
+
+
 
 LEDOE = DigitalInOut(board.GP9)
 LEDOE.direction = Direction.OUTPUT
@@ -40,33 +41,34 @@ def initAll():
     sets = BoardSettings("BoardSettings.txt")
     leds = LedString(sets)
     CP = CommandParser(leds,sets)
-    AR = animReader(CP)
-    seReader = serialCommandReader(CP)
+    AR = animReader(leds,sets)
+    seReader = serialCommandReader(leds,sets)
     LEDOE.value = 0
     CP.ClearAll()
     CP.frcShow()
 
 
 
-async def main():
+def main():
     trap = False
     while True:
-        if not bt1.value and not trap:
-            trap = True
-            AR.playAnim("dial.anim")
-        elif not bt1.value and trap:
-            trap = False
-            AR.playAnim("close.anim")
-        #await asyncio.sleep_ms(10)
-    
-    
+        if AR.animFinished:
+            if not bt1.value and not trap:
+                trap = True
+                AR.setAnim("dial.anim")
+            elif not bt1.value and trap:
+                trap = False
+                AR.setAnim("close.anim")
+        AR.cyclicCall()
+        seReader.cyclicCall()
+        time.sleep(0.001)
 
-async def go():
-    await asyncio.gather(asyncio.create_task(main()), asyncio.create_task(seReader.serTask()))
+
+
 
 
 if __name__ == '__main__':
     initAll()
-    asyncio.run(go())
-                
-            
+    main()
+
+
