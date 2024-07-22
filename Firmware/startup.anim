@@ -1,0 +1,5 @@
+DEFBRT
+SET I0:36:2 Cffffff
+DLY T2000
+CLR
+DLY
