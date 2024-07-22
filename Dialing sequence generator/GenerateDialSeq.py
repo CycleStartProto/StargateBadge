@@ -3,6 +3,8 @@ glyphColor = (100,100,100)
 chevronColor = (0,40,180)
 wormholeColor = (100,180,255)
 
+wormholeIdleBrightness = 0.1
+
 mainChevOffset = 36
 outerChevOffset = mainChevOffset+36
 innerChevOffset = outerChevOffset+36
@@ -102,19 +104,19 @@ def wormhole():
     f.write("DEFDLY T5\n")
     f.write("SET I"+str(wormholeOffset)+":"+str(wormholeOffset+36)+" "+formatColor(color))
     f.write("DLY\n")
-    while colorh[2] > 0.05:
+    while colorh[2] > 0.02:
         colorh = (colorh[0],colorh[1],colorh[2]-0.01)
         color = rgb_tuple2int(colorHSV(colorh[0],colorh[1],colorh[2]))
         f.write("SET I"+str(wormholeOffset)+":"+str(wormholeOffset+36)+" "+formatColor(color))
         f.write("DLY\n")
-    while colorh[2] < 0.1:
+    while colorh[2] < wormholeIdleBrightness:
         colorh = (colorh[0],colorh[1],colorh[2]+0.002)
         color = rgb_tuple2int(colorHSV(colorh[0],colorh[1],colorh[2]))
         f.write("SET I"+str(wormholeOffset)+":"+str(wormholeOffset+36)+" "+formatColor(color))
         f.write("DLY\n")
         
 def shutdown():
-    colorh = (wormholeColor[0],wormholeColor[1],0.1)
+    colorh = (wormholeColor[0],wormholeColor[1],wormholeIdleBrightness)
     color = rgb_tuple2int(colorHSV(colorh[0],colorh[1],colorh[2]))
     f.write("DEFDLY T5\n")
     f.write("SET I"+str(wormholeOffset)+":"+str(wormholeOffset+36)+" "+formatColor(color))
@@ -128,6 +130,23 @@ def shutdown():
     f.write("DLY T1000\n")
     f.write("CLR\n")
     f.write("SHOW\n")
+    
+def idle():
+    colorh = (wormholeColor[0],wormholeColor[1],wormholeIdleBrightness)
+    color = rgb_tuple2int(colorHSV(colorh[0],colorh[1],colorh[2]))
+    f.write("DEFDLY T50\n")
+    f.write("SET I"+str(wormholeOffset)+":"+str(wormholeOffset+36)+" "+formatColor(color))
+    f.write("DLY\n")
+    while colorh[2] > 0.01:
+        color = rgb_tuple2int(colorHSV(colorh[0],colorh[1],colorh[2]))
+        colorh = (colorh[0],colorh[1],colorh[2]-0.002)
+        f.write("SET I"+str(wormholeOffset)+":"+str(wormholeOffset+36)+" "+formatColor(color))
+        f.write("DLY\n")
+    while colorh[2] < wormholeIdleBrightness:
+        color = rgb_tuple2int(colorHSV(colorh[0],colorh[1],colorh[2]))
+        colorh = (colorh[0],colorh[1],colorh[2]+0.002)
+        f.write("SET I"+str(wormholeOffset)+":"+str(wormholeOffset+36)+" "+formatColor(color))
+        f.write("DLY\n")
     
 
     
@@ -153,5 +172,8 @@ if __name__ == '__main__':
     f.close()
     f = open("close.anim","w")
     shutdown()
+    f.close()
+    f = open("idle.anim","w")
+    idle()
     f.close()
     

@@ -1,14 +1,5 @@
-0=current cal mode, 1=current disp mode, 2=Normal Mode
-Mode: 2;
-
-serial channel ID
-Serial ID: 0;
-
 name of animation to load on startup
-Startup File: "idle.anim";
-
-Current Limit Settings
-Board Current: 2000; (mA)
+Startup File: startup.anim;
 
 number of pixel in each strand
 Strand Length: 36;
@@ -16,11 +7,23 @@ Strand Length: 36;
 Default Animation Frame Delay:
 Default Frame Delay: 15; (ms)
 
+Gate Auto Close Time (set to 0 to disable):
+Auto Close Time: 42.0; (s)
+
+Random Dial Check interval (how frequently it rolls the dice):
+Random Dial Check: 15.0; (s)
+
+Random Dial Chance of dialing (out of 100):
+Random Dial Chance: 20;
+
 set default brightness (can be overridden by external commands)
 Default Brightness: 0.3; (floating Point, 0.0-1.0)
 
+Battery Low Voltage Shut Down Threshold:
+Low Voltage Thresh: 3.2; (V)
+
 ADC current measurement cal values
 
-Shunt Scale: 0.07784;
-Shunt Offset: 272.4;
+ADC Scale: 0.0000760646106;
+ADC Offset: 0.0;
 

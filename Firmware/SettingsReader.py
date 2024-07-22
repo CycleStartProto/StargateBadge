@@ -6,15 +6,17 @@ class BoardSettings:
     haltRequested = False
 
     #settings Managed By this class:
-    Mode = 2
-    SerialID = 0
     StartupFile = ""
-    BoardCurrentLimit = 1000
     StrandLength = 8
     DefaultFrameDelay = 15
     DefaultBrightness = 0.3
-    ShuntCalScale = 0
-    ShuntCalOffset = 0
+    BatLowVoltageThresh = 3.0
+    ADCCalScale = 0
+    ADCCalOffset = 0
+    
+    AutoCloseTime = 0
+    RandomDialCheckInterval = 0
+    RandomDialChance = 0
     
     def __init__(self, filename):
         self.loadSettings(filename)
@@ -71,14 +73,8 @@ class BoardSettings:
         with open(file, 'rt') as f:
             text = f.read()
         
-        #Read Operating Mode
-        self.Mode = self.readInt(text,"Mode: ")
-        #Read Serial Channel ID
-        self.SerialID = self.readInt(text,"Serial ID: ")
         #Read Startup File
         self.StartupFile = self.readString(text,"Startup File: ")
-        #Read Board Current Limit
-        self.BoardCurrentLimit = self.readInt(text,"Board Current: ")
         #Read Strand Lengths
         self.StrandLength = self.readInt(text,"Strand Length: ")
         #Read Default Frame Delay
@@ -86,20 +82,27 @@ class BoardSettings:
         #Read Default Brightness
         self.DefaultBrightness  = self.readFloat(text,"Default Brightness: ")
         #Read Current Shunt Scale
-        self.ShuntCalScale = self.readFloat(text,"Shunt Scale: ")
+        self.ADCCalScale = self.readFloat(text,"ADC Scale: ")
         #Read Current Shunt Offset
-        self.ShuntCalOffset = self.readFloat(text,"Shunt Offset: ")
+        self.ADCCalOffset = self.readFloat(text,"ADC Offset: ")
+        #Read the auto close time
+        self.AutoCloseTime = self.readFloat(text,"Auto Close Time: ")
+        #Read Random Dial Check Interval
+        self.RandomDialCheckInterval = self.readFloat(text,"Random Dial Check: ")
+        #Read Random Dial Check Chance
+        self.RandomDialChance = self.readInt(text,"Random Dial Chance: ")
+        #Read Battery Low Voltage Threshold
+        self.BatLowVoltageThresh = self.readFloat(text,"Low Voltage Thresh: ")
         
     def printSettings(self):
         print("Mode: "+str(self.Mode))
         print("Serial ID: "+str(self.SerialID))
         print("Startup File: "+self.StartupFile)
-        print("Board Current Limit: "+str(self.BoardCurrentLimit))
         print("Strand Length: "+str(self.StrandLength))
         print("Default Frame Delay: "+str(self.DefaultFrameDelay))
         print("Default Brightness: "+str(self.DefaultBrightness))
-        print("Shunt Scale: "+str(self.ShuntCalScale))
-        print("Shunt Offset: "+str(self.ShuntCalOffset))
+        print("ADC Scale: "+str(self.ShuntCalScale))
+        print("ADC Offset: "+str(self.ShuntCalOffset))
         
         
 if __name__ == '__main__':

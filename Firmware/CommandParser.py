@@ -254,7 +254,7 @@ class CommandParser:
         if self.debug:
             print("Restoring Default Brightness")
         self.localBright = self.sets.DefaultBrightness
-        self.leds.setBrightness = self.localBright
+        self.leds.setBrightness(self.localBright)
         self.leds.show()
 
     def frcShow(self):
