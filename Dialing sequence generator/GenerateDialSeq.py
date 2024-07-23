@@ -38,7 +38,7 @@ keeponArray = []
 def writeHeader():
     f.write("CLR\n")
     f.write("DEFDLY T60\n")
-    f.write("BRT B1.0\n")
+    f.write("BRT B0.6\n")
     
     
 def dialLeft(start,end):

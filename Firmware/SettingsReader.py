@@ -7,10 +7,15 @@ class BoardSettings:
 
     #settings Managed By this class:
     StartupFile = ""
+    OutgoingAnim = ""
+    IncomingAnim = ""
+    IdleAnim = ""
+    CloseAnim = ""
     StrandLength = 8
     DefaultFrameDelay = 15
     DefaultBrightness = 0.3
     BatLowVoltageThresh = 3.0
+    BatDispMode = 1
     ADCCalScale = 0
     ADCCalOffset = 0
     
@@ -75,6 +80,14 @@ class BoardSettings:
         
         #Read Startup File
         self.StartupFile = self.readString(text,"Startup File: ")
+        #Read Outgoing anim file
+        self.OutgoingAnim = self.readString(text,"Outgoing Animation: ")
+        #Read Incoming anim file
+        self.IncomingAnim = self.readString(text,"Incoming Animation: ")
+        #Read idle anim file
+        self.IdleAnim = self.readString(text,"Idle Animation: ")
+        #Read gate close anim file
+        self.CloseAnim = self.readString(text,"Shutdown Animation: ")
         #Read Strand Lengths
         self.StrandLength = self.readInt(text,"Strand Length: ")
         #Read Default Frame Delay
@@ -93,6 +106,11 @@ class BoardSettings:
         self.RandomDialChance = self.readInt(text,"Random Dial Chance: ")
         #Read Battery Low Voltage Threshold
         self.BatLowVoltageThresh = self.readFloat(text,"Low Voltage Thresh: ")
+        if self.BatLowVoltageThresh < 2.5:
+            self.BatLowVoltageThresh = 2.5
+        self.BatDispMode = self.readInt(text,"Bat Display Mode: ")
+        if self.BatDispMode != 1 and self.BatDispMode != 2 and self.BatDispMode != 3:
+            self.BatDispMode = 1
         
     def printSettings(self):
         print("Mode: "+str(self.Mode))

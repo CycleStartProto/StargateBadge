@@ -1,11 +1,25 @@
+------------------------------------
+Animation files
+------------------------------------
+
 name of animation to load on startup
 Startup File: startup.anim;
 
-number of pixel in each strand
-Strand Length: 36;
+name of outgoing wormhole animation
+Outgoing Animation: dial.anim;
 
-Default Animation Frame Delay:
-Default Frame Delay: 15; (ms)
+name of incoming wormhole animation
+Incoming Animation: dial.anim;
+
+name of gate active idle animation
+Idle Animation: idle.anim;
+
+name of gate shutdown animation
+Shutdown Animation: close.anim;
+
+------------------------------------
+Stargate Dialing Settings
+------------------------------------
 
 Gate Auto Close Time (set to 0 to disable):
 Auto Close Time: 42.0; (s)
@@ -14,15 +28,32 @@ Random Dial Check interval (how frequently it rolls the dice):
 Random Dial Check: 15.0; (s)
 
 Random Dial Chance of dialing (out of 100):
-Random Dial Chance: 20;
+Random Dial Chance: 15;
+
+-----------------------------------
+LED/animation settings
+-----------------------------------
 
 set default brightness (can be overridden by external commands)
-Default Brightness: 0.3; (floating Point, 0.0-1.0)
+Default Brightness: 0.5; (floating Point, 0.0-1.0)
 
-Battery Low Voltage Shut Down Threshold:
-Low Voltage Thresh: 3.2; (V)
+number of pixel in each strand
+Strand Length: 36;
 
-ADC current measurement cal values
+Default Animation Frame Delay:
+Default Frame Delay: 15; (ms)
+
+----------------------------------
+Battery Settings
+----------------------------------
+
+Battery Low Voltage Shut Down Threshold (2.5V min):
+Low Voltage Thresh: 2.8; (V)
+
+Battery Voltage display mode (1 = glyphs, 2 = wormhole, 3 = both):
+Bat Display Mode: 3;
+
+ADC Battery Voltage measurement cal values
 
 ADC Scale: 0.0000760646106;
 ADC Offset: 0.0;

@@ -20,6 +20,10 @@ from CommandParser import CommandParser
 from serialCommandReader import serialCommandReader
 from animReader import animReader
 
+#-----------------------------------------------------------
+#Hardware pin setup
+#-----------------------------------------------------------
+
 spi = io.SPI(board.GP18, board.GP19, board.GP20)
 cs = DigitalInOut(board.GP17)
 lis3dh = adafruit_lis3dh.LIS3DH_SPI(spi, cs)
@@ -45,6 +49,10 @@ bt3.direction = Direction.INPUT
 bt4 = DigitalInOut(board.GP13)
 bt4.direction = Direction.INPUT
 
+#--------------------------------------
+# main state machine variable
+#--------------------------------------
+
 '''Gate Statemachine variable,
 0 = low battery, no display allowed
 1 = startup
@@ -57,6 +65,10 @@ bt4.direction = Direction.INPUT
 30 = accel ring mode'''
 gateState = 1
 
+#------------------------------------------------------------
+#convienence offsets for setting chevrons and wormholeOffset
+#because doing math is hard, so lets make the computer do it
+#------------------------------------------------------------
 
 mainChevOffset = 36
 outerChevOffset = mainChevOffset+36
@@ -88,8 +100,23 @@ def initAll():
 def getBatVoltage():
     return (ana.value*sets.ADCCalScale)+sets.ADCCalOffset
 
+def mapVal(x, in_min, in_max, out_min, out_max):
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
-
+def batDisp(numleds,startindex):
+    redEnd = 6
+    yelEnd = 18
+    if numleds > 35:
+        numleds = 35
+    if numleds > redEnd:
+        CP.Set(slice(startindex,startindex+redEnd),0xFF0000)
+        if numleds > yelEnd:
+            CP.Set(slice(startindex+redEnd,startindex+yelEnd),0xFF5000)
+            CP.Set(slice(startindex+yelEnd,startindex+numleds),0x00FF00)
+        else:
+            CP.Set(slice(startindex+redEnd,startindex+numleds),0xFFFF00)
+    else:
+        CP.Set(slice(startindex,startindex+numleds),0xFF0000)
 
 def main():
     global gateState
@@ -101,15 +128,26 @@ def main():
     while True:
         batV = getBatVoltage()
         currentTime = time.monotonic()
+        
+        #------------------------------------
+        #Low battery state, turn off all LEDs
+        #------------------------------------
         if batV < sets.BatLowVoltageThresh:
             CP.Halt()
             CP.ClearAll()
             CP.frcShow()
             gateState = 0
             
+        #------------------------------------------------------------------------------
+        #Button State trap, prevents button presses from racing through possible states
+        #------------------------------------------------------------------------------
+        
         if bt2.value and bt1.value and bt3.value:
             bttrap = False
-            
+        
+        #----------------------------------------------------------
+        #Button press catch for Accelerometer display (state 30)
+        #----------------------------------------------------------
         if not bt3.value and not bttrap and gateState != 30:
             bttrap = True
             CP.Halt()
@@ -117,6 +155,10 @@ def main():
             CP.setDefaultBrightness()
             gateState = 30
             
+        #--------------------------------
+        #Accelerometer display main logic
+        #--------------------------------
+        
         if gateState == 30:
             ringColor = 0x505050
             wormColor = 0x00000B
@@ -154,24 +196,30 @@ def main():
                 CP.ClearAll()
                 CP.frcShow()
                 gateState = 2
-                
+        
+        #----------------------------------------------------------------
+        #Button Press State Catch for Battery capacity display (state 20)
+        #----------------------------------------------------------------
+        
         if not bt2.value and not bttrap and gateState != 20:
             bttrap = True
             gateState = 20
             CP.Halt()
             CP.ClearAll()
-            CP.setDefaultBrightness()
-            first = int(batV)
-            second = int((batV-first)*10.0)
-            third = int((batV-first)*100.0)-second*10
-            CP.Set(slice(mainChevOffset,mainChevOffset+first*2),0x880600)
-            CP.Set(slice(innerChevOffset,innerChevOffset+first*2),0x880600)
-            CP.Set(slice(outerChevOffset,outerChevOffset+first*2),0x880600)
-            CP.Set(slice(0,second),0x101010)
-            CP.Set(slice(wormholeOffset,wormholeOffset+third),0x101010)
-            CP.frcShow()
+            CP.Brightness(0.3)
             
+        #------------------------------------
+        #Battery capacity display main logic
+        #------------------------------------
+        
         if gateState == 20:
+            CP.ClearAll()
+            numleds = int(mapVal(batV,sets.BatLowVoltageThresh,4.2,0,35))
+            if sets.BatDispMode == 1 or sets.BatDispMode == 3:
+                batDisp(numleds,0)
+            if sets.BatDispMode == 2 or sets.BatDispMode == 3:
+                batDisp(numleds,wormholeOffset)
+            CP.frcShow()
             if not bt2.value and not bttrap:
                 bttrap = True
                 trap = False
@@ -179,23 +227,45 @@ def main():
                 CP.ClearAll()
                 CP.frcShow()
                 gateState = 2
+                
+        #--------------------------------------------------------------------
+        #Gate Power On Startup state (waits until startup animation finishes)
+        #--------------------------------------------------------------------
             
         if gateState == 1:
             if AR.animFinished:
                 gateState = 2
-                
+        
+        #-------------------------------------------------
+        #Gate dark but ready, wait for starting conditions
+        #-------------------------------------------------
+        
         elif gateState == 2:
             if currentTime > (lastRandCheck+sets.RandomDialCheckInterval) and sets.RandomDialChance != 0:
                 lastRandCheck = currentTime
                 if random.randint(0,100) < sets.RandomDialChance:
-                    gateState = 3
+                    gateState = 6
             if not bt1.value and not bttrap:
                 bttrap = True
                 gateState = 3
-                
+        #----------------------
+        #Dial outgoing wormhole
+        #----------------------
         elif gateState == 3:
             if not trap:
-                AR.setAnim("dial.anim")
+                AR.setAnim(sets.OutgoingAnim)
+                trap = True
+            if AR.animFinished:
+                trap = False
+                if sets.AutoCloseTime != 0:
+                    shutdownTime = currentTime + sets.AutoCloseTime
+                gateState = 4
+        #------------------------
+        #Dial Incoming wormhole
+        #------------------------
+        elif gateState == 6:
+            if not trap:
+                AR.setAnim(sets.IncomingAnim)
                 trap = True
             if AR.animFinished:
                 trap = False
@@ -203,9 +273,13 @@ def main():
                     shutdownTime = currentTime + sets.AutoCloseTime
                 gateState = 4
                 
+        #--------------------------------------
+        #Active wormhole idle animation (loops)
+        #--------------------------------------
+                
         elif gateState == 4:
             if not trap:
-                AR.setAnim("idle.anim")
+                AR.setAnim(sets.IdleAnim)
                 trap = True
             if AR.animFinished:
                 trap = False
@@ -216,15 +290,22 @@ def main():
                 bttrap = True
                 trap = False
                 gateState = 5
-                
+        #----------------------------------
+        #Gate Shutdown  animation
+        #----------------------------------
+        
         elif gateState == 5:
             if not trap:
-                AR.setAnim("close.anim")
+                AR.setAnim(sets.CloseAnim)
                 trap = True
             if AR.animFinished:
                 trap = False
                 lastRandCheck = currentTime
                 gateState = 2
+                
+        #-------------------------------------
+        #cyclic calls to update all the things
+        #-------------------------------------
         AR.cyclicCall()
         seReader.cyclicCall()
         time.sleep(0.001)
