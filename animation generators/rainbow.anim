@@ -1,0 +1,40 @@
+CLR
+DEFDLY T10
+BRT B0.6
+SET I0 Cff0000
+Cff0000
+Cff2a00
+Cff5500
+Cff8000
+Cffaa00
+Cffd400
+Cffff00
+Cd4ff00
+Caaff00
+C80ff00
+C55ff00
+C2aff00
+C00ff00
+C00ff2a
+C00ff55
+C00ff80
+C00ffaa
+C00ffd4
+C00ffff
+C00d4ff
+C00aaff
+C0080ff
+C0055ff
+C002bff
+C0000ff
+C2a00ff
+C5500ff
+C8000ff
+Caa00ff
+Cd500ff
+Cff00ff
+Cff00d4
+Cff00aa
+Cff0080
+Cff0055
+Cff002b
