@@ -344,7 +344,7 @@ def main():
         #-------------------------------------
         AR.cyclicCall()
         seReader.cyclicCall()
-        #time.sleep(0.001)
+        time.sleep(0.0001)
 
 
 
