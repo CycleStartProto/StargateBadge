@@ -11,6 +11,7 @@ class BoardSettings:
     IncomingAnim = ""
     IdleAnim = ""
     CloseAnim = ""
+    AltAnim = ""
     StrandLength = 8
     DefaultFrameDelay = 15
     DefaultBrightness = 0.3
@@ -22,6 +23,7 @@ class BoardSettings:
     AutoCloseTime = 0
     RandomDialCheckInterval = 0
     RandomDialChance = 0
+    RandomDialMode = 3
     
     def __init__(self, filename):
         self.loadSettings(filename)
@@ -88,6 +90,8 @@ class BoardSettings:
         self.IdleAnim = self.readString(text,"Idle Animation: ")
         #Read gate close anim file
         self.CloseAnim = self.readString(text,"Shutdown Animation: ")
+        #Read alternate mode animation
+        self.AltAnim = self.readString(text,"Alternate Animation: ")
         #Read Strand Lengths
         self.StrandLength = self.readInt(text,"Strand Length: ")
         #Read Default Frame Delay
@@ -104,6 +108,8 @@ class BoardSettings:
         self.RandomDialCheckInterval = self.readFloat(text,"Random Dial Check: ")
         #Read Random Dial Check Chance
         self.RandomDialChance = self.readInt(text,"Random Dial Chance: ")
+        #Read Random Dial Mode
+        self.RandomDialMode = self.readInt(text,"Random Dial Mode: ")
         #Read Battery Low Voltage Threshold
         self.BatLowVoltageThresh = self.readFloat(text,"Low Voltage Thresh: ")
         if self.BatLowVoltageThresh < 2.5:
@@ -111,6 +117,8 @@ class BoardSettings:
         self.BatDispMode = self.readInt(text,"Bat Display Mode: ")
         if self.BatDispMode != 1 and self.BatDispMode != 2 and self.BatDispMode != 3:
             self.BatDispMode = 1
+        if self.RandomDialMode != 1 and self.RandomDialMode != 2 and self.RandomDialMode != 3:
+            self.RandomDialMode = 3
         
     def printSettings(self):
         print("Mode: "+str(self.Mode))

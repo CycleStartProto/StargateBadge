@@ -6,16 +6,19 @@ name of animation to load on startup
 Startup File: startup.anim;
 
 name of outgoing wormhole animation
-Outgoing Animation: dial.anim;
+Outgoing Animation: outgoing.anim;
 
 name of incoming wormhole animation
-Incoming Animation: dial.anim;
+Incoming Animation: incoming.anim;
 
 name of gate active idle animation
 Idle Animation: idle.anim;
 
 name of gate shutdown animation
 Shutdown Animation: close.anim;
+
+name of alternate animation (turned on by uk3)
+Alternate Animation: rainbow.anim;
 
 ------------------------------------
 Stargate Dialing Settings
@@ -29,6 +32,9 @@ Random Dial Check: 15.0; (s)
 
 Random Dial Chance of dialing (out of 100):
 Random Dial Chance: 15;
+
+Random Dialing Option (1 = incoming only, 2 = outgoing only, 3 = 50/50 mix both)
+Random Dial Mode: 3;
 
 -----------------------------------
 LED/animation settings

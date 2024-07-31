@@ -1,9 +1,13 @@
 import colorsys
-glyphColor = (100,100,100)
-chevronColor = (0,40,180)
+glyphColor = (20,20,20)
+chevronColor = (0,57,255)
 wormholeColor = (100,180,255)
 
 wormholeIdleBrightness = 0.1
+mainBrightness = 0.5
+
+outgoingDialFrameDelay = 60
+incomingDialFrameDelay = 100
 
 mainChevOffset = 36
 outerChevOffset = mainChevOffset+36
@@ -12,7 +16,7 @@ wormholeOffset = innerChevOffset+36
 
 
 
-f = open("dial.anim","w")
+f = open("outgoing.anim","w")
 
 def formatColor(color):
     return str("C"+f"{color:#0{8}x}\n"[2:])
@@ -35,10 +39,10 @@ wormholeColor = colorsys.rgb_to_hsv(wormholeColor[0]/255.0,wormholeColor[1]/255.
 
 keeponArray = []
 
-def writeHeader():
+def writeHeader(delay):
     f.write("CLR\n")
-    f.write("DEFDLY T60\n")
-    f.write("BRT B0.6\n")
+    f.write("DEFDLY T"+str(delay)+"\n")
+    f.write("BRT B"+str(mainBrightness)+"\n")
     
     
 def dialLeft(start,end):
@@ -91,6 +95,11 @@ def encodeChevron(num):
     f.write("SET I"+str(mainChevOffset+num*2)+":"+str(mainChevOffset+num*2+2)+" "+formatColor(chevronColor))
     f.write("DLY T500\n")
     
+def incomeChevron(num):
+    f.write("SET I"+str(outerChevOffset+num*2)+":"+str(outerChevOffset+num*2+2)+" "+formatColor(chevronColor))
+    f.write("SET I"+str(innerChevOffset+num*2)+":"+str(innerChevOffset+num*2+2)+" "+formatColor(chevronColor))
+    f.write("SET I"+str(mainChevOffset+num*2)+":"+str(mainChevOffset+num*2+2)+" "+formatColor(chevronColor))
+    
 def lockChevrons():
     f.write("SET I"+str(outerChevOffset)+":"+str(outerChevOffset+18)+" "+formatColor(chevronColor))
     f.write("SET I"+str(innerChevOffset)+":"+str(innerChevOffset+18)+" "+formatColor(chevronColor))
@@ -101,7 +110,7 @@ def lockChevrons():
 def wormhole():
     colorh = wormholeColor
     color = rgb_tuple2int(colorHSV(wormholeColor[0],wormholeColor[1],wormholeColor[2]))
-    f.write("DEFDLY T5\n")
+    f.write("DEFDLY T7\n")
     f.write("SET I"+str(wormholeOffset)+":"+str(wormholeOffset+36)+" "+formatColor(color))
     f.write("DLY\n")
     while colorh[2] > 0.02:
@@ -118,7 +127,7 @@ def wormhole():
 def shutdown():
     colorh = (wormholeColor[0],wormholeColor[1],wormholeIdleBrightness)
     color = rgb_tuple2int(colorHSV(colorh[0],colorh[1],colorh[2]))
-    f.write("DEFDLY T5\n")
+    f.write("DEFDLY T7\n")
     f.write("SET I"+str(wormholeOffset)+":"+str(wormholeOffset+36)+" "+formatColor(color))
     f.write("DLY\n")
     while colorh[2] < 1.0:
@@ -148,11 +157,19 @@ def idle():
         f.write("SET I"+str(wormholeOffset)+":"+str(wormholeOffset+36)+" "+formatColor(color))
         f.write("DLY\n")
     
-
+def incoming():
+    for i in range(1,36):
+        f.write("SET I"+str(i)+" "+formatColor(glyphColor))
+        if i%4 == 0:
+            incomeChevron(int(i/4))
+        f.write("DLY\n")
+    f.write("SET I0 "+formatColor(glyphColor))
+    incomeChevron(0)
+    f.write("DLY\n")
     
     
 if __name__ == '__main__':
-    writeHeader()
+    writeHeader(outgoingDialFrameDelay)
     dialLeft(0,4)
     encodeChevron(1)
     dialRight(4,8)
@@ -168,6 +185,11 @@ if __name__ == '__main__':
     dialLeft(32,36)
     encodeChevron(0)
     lockChevrons()
+    wormhole()
+    f.close()
+    f = open("incoming.anim","w")
+    writeHeader(incomingDialFrameDelay)
+    incoming()
     wormhole()
     f.close()
     f = open("close.anim","w")

@@ -1,6 +1,6 @@
 import colorsys
 
-defFrameDelay = 10
+defFrameDelay = 2
 
 f = open("rainbow.anim","w")
 
@@ -24,26 +24,42 @@ def colorHSV(h, s, v):
 def colorRGB(red, green, blue):
     return colorsys.rgb_to_hsv(red,green,blue)
     
-def scaleHue(val):
-    return (abs(val)%36)/36.0
+def scaleMainHue(val):
+    return abs((val%36)/36.0)
+    
+def scaleChevHue(val):
+    return abs((val%18)/18.0)
     
 def formatHsv(h,s,v):
     return formatColor(rgb_tuple2int(colorHSV(h,s,v)))
     
 def writeHeader():
-    f.write("CLR\n")
     f.write("DEFDLY T"+str(defFrameDelay)+"\n")
-    f.write("BRT B0.6\n")
+    f.write("BRT B0.5\n")
     
 def rainbowFrame(offset):
-    f.write("SET I0 "+formatHsv(scaleHue(offset),1.0,1.0))
-    for i in range(0,36):
-        f.write(formatHsv(scaleHue(offset+i),1.0,1.0))
+    f.write("SET I0 "+formatHsv(scaleMainHue(offset),1.0,0.1))
+    for i in range(1,36):
+        f.write(formatHsv(scaleMainHue(offset-i),1.0,0.1))
+    f.write("SET I"+str(mainChevOffset)+" "+formatHsv(scaleChevHue(offset),1.0,1.0))
+    for i in range(1,18):
+        f.write(formatHsv(scaleChevHue(offset+i),1.0,1.0))
+    f.write("SET I"+str(outerChevOffset)+" "+formatHsv(scaleChevHue(offset),1.0,1.0))
+    for i in range(1,18):
+        f.write(formatHsv(scaleChevHue(offset+i),1.0,1.0))
+    f.write("SET I"+str(innerChevOffset)+" "+formatHsv(scaleChevHue(offset),1.0,1.0))
+    for i in range(1,18):
+        f.write(formatHsv(scaleChevHue(offset+i),1.0,1.0))
+    f.write("SET I"+str(wormholeOffset)+" "+formatHsv(scaleMainHue(offset),1.0,0.1))
+    for i in range(1,36):
+        f.write(formatHsv(scaleMainHue(offset+i),1.0,0.1))
         
     
 if __name__ == '__main__':
     writeHeader()
-    rainbowFrame(0)
+    for i in range(0,36):
+        rainbowFrame(i)
+        f.write("SHOW\n")
     f.close()
     
     

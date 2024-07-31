@@ -62,7 +62,8 @@ bt4.direction = Direction.INPUT
 5 = closing
 
 20 = show bat voltage
-30 = accel ring mode'''
+30 = accel ring mode
+31 = alternate animation mode'''
 gateState = 1
 
 #------------------------------------------------------------
@@ -106,8 +107,8 @@ def mapVal(x, in_min, in_max, out_min, out_max):
 def batDisp(numleds,startindex):
     redEnd = 6
     yelEnd = 18
-    if numleds > 35:
-        numleds = 35
+    if numleds > 36:
+        numleds = 36
     if numleds > redEnd:
         CP.Set(slice(startindex,startindex+redEnd),0xFF0000)
         if numleds > yelEnd:
@@ -142,13 +143,13 @@ def main():
         #Button State trap, prevents button presses from racing through possible states
         #------------------------------------------------------------------------------
         
-        if bt2.value and bt1.value and bt3.value:
+        if bt2.value and bt1.value and bt3.value and bt4.value:
             bttrap = False
         
         #----------------------------------------------------------
-        #Button press catch for Accelerometer display (state 30)
+        #Button press catch for Alternate mode display (state 30)
         #----------------------------------------------------------
-        if not bt3.value and not bttrap and gateState != 30:
+        if not bt3.value and not bttrap and gateState < 30:
             bttrap = True
             CP.Halt()
             CP.ClearAll()
@@ -159,7 +160,7 @@ def main():
         #Accelerometer display main logic
         #--------------------------------
         
-        if gateState == 30:
+        elif gateState == 30:
             ringColor = 0x505050
             wormColor = 0x00000B
             ax, ay, az = lis3dh.acceleration
@@ -195,13 +196,31 @@ def main():
                 CP.Halt()
                 CP.ClearAll()
                 CP.frcShow()
+                gateState = 31
+                
+        #--------------------------------------------------------
+        #Alternate Animation mode
+        #--------------------------------------------------------
+        
+        elif gateState == 31:
+            if not trap:
+                AR.setAnim(sets.AltAnim)
+                trap = True
+            if AR.animFinished:
+                trap = False
+            if not bt3.value and not bttrap:
+                bttrap = True
+                trap = False
+                CP.Halt()
+                CP.ClearAll()
+                CP.frcShow()
                 gateState = 2
         
         #----------------------------------------------------------------
         #Button Press State Catch for Battery capacity display (state 20)
         #----------------------------------------------------------------
         
-        if not bt2.value and not bttrap and gateState != 20:
+        elif not bt2.value and not bttrap and gateState != 20:
             bttrap = True
             gateState = 20
             CP.Halt()
@@ -212,9 +231,9 @@ def main():
         #Battery capacity display main logic
         #------------------------------------
         
-        if gateState == 20:
+        elif gateState == 20:
             CP.ClearAll()
-            numleds = int(mapVal(batV,sets.BatLowVoltageThresh,4.2,0,35))
+            numleds = int(mapVal(batV,sets.BatLowVoltageThresh+0.4,4.19,0,36))
             if sets.BatDispMode == 1 or sets.BatDispMode == 3:
                 batDisp(numleds,0)
             if sets.BatDispMode == 2 or sets.BatDispMode == 3:
@@ -232,7 +251,7 @@ def main():
         #Gate Power On Startup state (waits until startup animation finishes)
         #--------------------------------------------------------------------
             
-        if gateState == 1:
+        elif gateState == 1:
             if AR.animFinished:
                 gateState = 2
         
@@ -243,11 +262,24 @@ def main():
         elif gateState == 2:
             if currentTime > (lastRandCheck+sets.RandomDialCheckInterval) and sets.RandomDialChance != 0:
                 lastRandCheck = currentTime
-                if random.randint(0,100) < sets.RandomDialChance:
-                    gateState = 6
+                randomInt = random.randint(0,100)
+                if randomInt < sets.RandomDialChance:
+                    if sets.RandomDialMode == 3:
+                        if randomInt%2 == 0:
+                            gateState = 3
+                        else:
+                            gateState = 6
+                    elif sets.RandomDialMode == 2:
+                        gateState = 3
+                    else:
+                        gateState = 6
             if not bt1.value and not bttrap:
                 bttrap = True
                 gateState = 3
+            elif not bt4.value and not bttrap:
+                bttrap = True
+                gateState = 6
+                
         #----------------------
         #Dial outgoing wormhole
         #----------------------
@@ -290,6 +322,10 @@ def main():
                 bttrap = True
                 trap = False
                 gateState = 5
+            if not bt4.value and not bttrap:
+                bttrap = True
+                trap = False
+                gateState = 5
         #----------------------------------
         #Gate Shutdown  animation
         #----------------------------------
@@ -308,7 +344,7 @@ def main():
         #-------------------------------------
         AR.cyclicCall()
         seReader.cyclicCall()
-        time.sleep(0.001)
+        #time.sleep(0.001)
 
 
 

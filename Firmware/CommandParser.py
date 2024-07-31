@@ -32,9 +32,6 @@ class CommandParser:
     #Led String Control Object
     leds = None
 
-    #Print debug output
-    debug = False
-
     #local frame delay
     frmDelay = 0
 
@@ -87,9 +84,8 @@ class CommandParser:
 
 
     def parseSet(self,instr):
-        str = instr
-        if str[0] == "I":
-            strAr = str.split(" ")
+        if instr[0] == "I":
+            strAr = instr.split(" ")
             self.lastSlice = self.make_slice(strAr[0][1:len(strAr[0])])
             self.Index = self.lastSlice.stop-1
             if len(strAr) == 1:
@@ -101,10 +97,10 @@ class CommandParser:
                 return 1
             else:
                 raise Exception("Failed To Parse Command, Incorrect Number of Parameters")
-        elif str[0] == "C" and str[1] != "L":
-            self.Color = int(str[1:len(str)],16)
+        elif instr[0] == "C" and instr[1] != "L":
+            self.Color = int(instr[1:len(instr)],16)
             self.Index = self.Index+1
-            self.Set(slice(self.Index,self.Index+1),self.Color)
+            self.singleSet(self.Index,self.Color)
             return 1
         else:
             return self.parseFullCommand(instr)
@@ -200,77 +196,56 @@ class CommandParser:
             return slice(*pieces)
 
     def ClearAll(self):
-        if self.debug:
-            print("Clearing All")
         self.leds.pixels.fill(0)
 
     def Clear(self,indicies):
-        if self.debug:
-            print("Clearing: "+str(indicies))
         self.leds.pixels[indicies] = [(0,0,0)]*len(self.leds.pixels[indicies])
 
+    def singleSet(self,index,color):
+        self.leds.pixels[index] = self.leds.rgb_int2tuple(color)
+    
     def Set(self, indicies, color):
-        if self.debug:
-            print("Setting: "+str(indicies)+" to color: "+f"{color:#0{8}x}")
         self.leds.pixels[indicies] = [self.leds.rgb_int2tuple(color)]*len(self.leds.pixels[indicies])
 
     def Delay(self):
-        if self.debug:
-            print("delaying 1 frame")
         if self.showOnDelay:
             self.leds.show()
         self.waitmode = True
         self.nextCommandAllowed = time.monotonic()+(self.frmDelay/1000.0)
 
     def setDefDelay(self, delTime):
-        if self.debug:
-            print("seting default frame delay to: "+str(delTime)+" ms")
         self.frmDelay = delTime
 
     def DelayTime(self, delTime):
-        if self.debug:
-            print("Delaying "+str(delTime)+" ms")
         if self.showOnDelay:
             self.leds.show()
         self.waitmode = True
         self.nextCommandAllowed = time.monotonic()+(delTime/1000.0)
 
     def RandomDelay(self,Lower,Upper):
-        if self.debug:
-            print("Random Delay, Lower: "+str(Lower)+" Upper: "+str(Upper))
         if self.showOnDelay:
             self.leds.show()
         self.waitmode = True
         self.nextCommandAllowed = time.monotonic()+(random.randint(Lower,Upper)/1000.0)
 
     def Brightness(self,val):
-        if self.debug:
-            print("Setting Brightness: "+str(val))
         self.localBright = val
         self.leds.setBrightness(val)
         self.leds.show()
 
     def setDefaultBrightness(self):
-        if self.debug:
-            print("Restoring Default Brightness")
         self.localBright = self.sets.DefaultBrightness
         self.leds.setBrightness(self.localBright)
         self.leds.show()
 
     def frcShow(self):
-        if self.debug:
-            print("updating pixels")
         self.leds.show()
 
     def LoadAnim(self,file):
-        if self.debug:
-            print("Loading anim file: "+file)
         self.sets.loadRequested = True
         self.sets.loadReqFile = file
 
     def Halt(self):
-        if self.debug:
-            print("Halting Current animation")
         self.sets.haltRequested = True
 
 
