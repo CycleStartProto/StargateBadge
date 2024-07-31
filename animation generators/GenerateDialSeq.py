@@ -7,7 +7,7 @@ wormholeIdleBrightness = 0.1
 mainBrightness = 0.5
 
 outgoingDialFrameDelay = 60
-incomingDialFrameDelay = 100
+incomingDialFrameDelay = 115
 
 mainChevOffset = 36
 outerChevOffset = mainChevOffset+36
