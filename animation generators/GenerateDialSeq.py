@@ -1,5 +1,5 @@
 import colorsys
-glyphColor = (20,20,20)
+glyphColor = (50,50,50)
 chevronColor = (0,57,255)
 wormholeColor = (100,180,255)
 
