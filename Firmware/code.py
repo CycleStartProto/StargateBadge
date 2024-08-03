@@ -3,7 +3,6 @@ from digitalio import *
 import analogio
 import microcontroller
 import busio as io
-import adafruit_ticks
 import gc
 import os
 import math
