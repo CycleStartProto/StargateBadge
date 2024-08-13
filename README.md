@@ -2,7 +2,6 @@
 A fun little limited run badge project
 ![2024-08-12 17 58 46](https://github.com/user-attachments/assets/fad5ef80-1e85-4c86-b748-a3f3511a8501)
 
-see dropbox link for full repo including 3d files (too big for github): https://www.dropbox.com/s/36e33p1j47o0ms9/StargateBadge.zip?dl=0
 
 # Known Issues
 - 3d print gets really close to LEDs and can damage them during assembly, be VERY CAREFUL
