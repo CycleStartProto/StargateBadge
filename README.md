@@ -2,6 +2,7 @@
 A fun little limited run badge project
 ![2024-08-12 17 58 46](https://github.com/user-attachments/assets/fad5ef80-1e85-4c86-b748-a3f3511a8501)
 
+Full repo with 3d files: https://drive.google.com/file/d/1T7bEAc4z4qsCiE_2lE-3noR91gCBkVOr/view?usp=drive_link
 
 # Known Issues
 - 3d print gets really close to LEDs and can damage them during assembly, be VERY CAREFUL
